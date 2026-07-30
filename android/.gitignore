@@ -1,0 +1,13 @@
+# gradle-wrapper.jar, gradlew, gradlew.bat are intentionally COMMITTED so a
+# fresh clone and CI can build without a local Gradle install.
+/.gradle
+/captures/
+/local.properties
+GeneratedPluginRegistrant.java
+.cxx/
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks
