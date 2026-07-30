@@ -11,6 +11,7 @@ import 'package:large_print_futoshiki/engine/generator.dart';
 import 'package:large_print_futoshiki/models/game_state.dart';
 import 'package:large_print_futoshiki/services/settings.dart';
 import 'package:large_print_futoshiki/services/progress.dart';
+import 'package:large_print_futoshiki/services/audio.dart';
 import 'package:large_print_futoshiki/services/daily_puzzle.dart';
 import 'package:large_print_futoshiki/widgets/app_theme.dart';
 import 'package:large_print_futoshiki/widgets/futoshiki_board.dart';
@@ -18,6 +19,53 @@ import 'package:large_print_futoshiki/widgets/futoshiki_board.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  group('Audio', () {
+    test('music is opt-in, sound effects are on', () async {
+      final s = Settings();
+      await s.load();
+      // Unprompted music is an uninstall trigger for this audience.
+      expect(s.music, isFalse);
+      expect(s.sound, isTrue);
+    });
+
+    test('audio preferences persist', () async {
+      final s = Settings();
+      await s.load();
+      await s.setMusic(true);
+      await s.setSound(false);
+      final again = Settings();
+      await again.load();
+      expect(again.music, isTrue);
+      expect(again.sound, isFalse);
+    });
+
+    test('the silent fallback service never throws without a platform', () {
+      // Widget tests have no audio plugin. Every call must be a safe no-op,
+      // because audio must never be able to break the game.
+      final a = AudioService.silent();
+      expect(a.isReady, isFalse);
+      for (final s in Sfx.values) {
+        a.play(s);
+      }
+      expect(() => a.dispose(), returnsNormally);
+    });
+
+    test('AudioService.instance is never null', () {
+      expect(AudioService.instance, isNotNull);
+    });
+
+    test('every sound effect maps to a declared asset path', () {
+      for (final s in Sfx.values) {
+        expect(s.path, startsWith('sfx/'));
+        expect(s.path, endsWith('.ogg'));
+      }
+      for (final m in Music.values) {
+        expect(m.path, startsWith('music/'));
+        expect(m.path, endsWith('.ogg'));
+      }
+    });
+  });
 
   group('Settings defaults', () {
     test('opens large with helpers on', () async {

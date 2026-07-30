@@ -7,6 +7,7 @@ import '../services/daily_puzzle.dart';
 import '../services/settings.dart';
 import '../services/progress.dart';
 import '../services/ads.dart';
+import '../services/audio.dart';
 import '../services/iap.dart';
 import 'game_screen.dart';
 import 'settings_screen.dart';
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // First run: show how-to-play. Almost nobody has seen a futoshiki, and the
     // arrows are meaningless until explained.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      AudioService.instance.playMusic(Music.menu);
       if (!widget.settings.seenTutorial && mounted) {
         await Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => HowToPlayScreen(settings: widget.settings)));
@@ -57,7 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
         dailyDate: daily,
       ),
     ));
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    // Returning from a puzzle: back to the calmer menu loop.
+    AudioService.instance.playMusic(Music.menu);
+    setState(() {});
   }
 
   Future<void> _playDaily() async {

@@ -8,6 +8,7 @@ import '../models/game_state.dart';
 import '../services/settings.dart';
 import '../services/progress.dart';
 import '../services/ads.dart';
+import '../services/audio.dart';
 import '../widgets/futoshiki_board.dart';
 
 class GameScreen extends StatefulWidget {
@@ -39,12 +40,18 @@ class _GameScreenState extends State<GameScreen>
   bool _finished = false;
   late final AnimationController _shake;
 
+  late final Music _track;
+
   GameState get g => widget.game;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Two gameplay tracks, picked from the puzzle itself so the same
+    // puzzle always sounds the same but the app is not monotonous.
+    _track = widget.dailyDate != null ? Music.gameplayA : Music.gameplayB;
+    AudioService.instance.playMusic(_track);
     _shake = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 260));
     _startTimer();
@@ -64,8 +71,10 @@ class _GameScreenState extends State<GameScreen>
   void didChangeAppLifecycleState(AppLifecycleState s) {
     if (s == AppLifecycleState.resumed) {
       _startTimer();
+      AudioService.instance.resumeFromBackground();
     } else {
       _timer?.cancel();
+      AudioService.instance.pauseForBackground();
       _save();
     }
   }
@@ -78,6 +87,7 @@ class _GameScreenState extends State<GameScreen>
   @override
   void dispose() {
     _timer?.cancel();
+    AudioService.instance.stopMusic();
     _shake.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -94,6 +104,7 @@ class _GameScreenState extends State<GameScreen>
       _hintIndex = null;
     });
     if (widget.settings.haptics) HapticFeedback.selectionClick();
+    AudioService.instance.play(Sfx.cellTap);
   }
 
   void _enter(int v) {
@@ -113,6 +124,7 @@ class _GameScreenState extends State<GameScreen>
       } else {
         final wrong = g.place(sel, v);
         _haptic(!wrong);
+        AudioService.instance.play(wrong ? Sfx.placeWrong : Sfx.placeGood);
         if (wrong) _shake.forward(from: 0);
       }
       _hintIndex = null;
@@ -147,6 +159,7 @@ class _GameScreenState extends State<GameScreen>
       _hintIndex = h.index;
     });
     _haptic(true);
+    AudioService.instance.play(Sfx.hintUsed);
     if (!mounted) return;
     // Explain the deduction, so a hint teaches rather than just fills a gap.
     ScaffoldMessenger.of(context)
@@ -174,6 +187,7 @@ class _GameScreenState extends State<GameScreen>
     if (_finished) return;
     _finished = true;
     _timer?.cancel();
+    AudioService.instance.play(Sfx.puzzleComplete);
     await widget.progress.clearSavedGame();
 
     final key = g.puzzle.difficulty.label;
@@ -186,6 +200,10 @@ class _GameScreenState extends State<GameScreen>
     if (!mounted) return;
 
     final streak = widget.progress.currentStreak;
+    // A daily streak extending is the one moment worth a second chime.
+    if (widget.dailyDate != null && streak > 1) {
+      AudioService.instance.play(Sfx.streakUp);
+    }
     final best = widget.progress.bestTimes[key];
     final isBest = best != null && g.elapsedSeconds <= best;
 

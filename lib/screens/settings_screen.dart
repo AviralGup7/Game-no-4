@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../services/settings.dart';
 import '../services/progress.dart';
 import '../services/iap.dart';
+import '../services/audio.dart';
 
 class SettingsScreen extends StatelessWidget {
   final Settings settings;
@@ -83,6 +84,25 @@ class SettingsScreen extends StatelessWidget {
                   title: Text('Vibration', style: label()),
                   value: s.haptics,
                   onChanged: s.setHaptics,
+                ),
+                SwitchListTile(
+                  title: Text('Sound effects', style: label()),
+                  subtitle: Text('Quiet taps and chimes', style: sub()),
+                  value: s.sound,
+                  onChanged: (v) {
+                    s.setSound(v);
+                    if (v) AudioService.instance.play(Sfx.buttonTap);
+                  },
+                ),
+                SwitchListTile(
+                  title: Text('Background music', style: label()),
+                  subtitle: Text('Off unless you turn it on', style: sub()),
+                  value: s.music,
+                  onChanged: (v) {
+                    s.setMusic(v);
+                    AudioService.instance
+                        .onMusicSettingChanged(v, Music.menu);
+                  },
                 ),
                 const Divider(height: 28),
                 if (!s.adFree)

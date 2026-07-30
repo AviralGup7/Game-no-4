@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'services/settings.dart';
 import 'services/progress.dart';
 import 'services/ads.dart';
+import 'services/audio.dart';
 import 'services/iap.dart';
 import 'screens/home_screen.dart';
 import 'widgets/app_theme.dart';
@@ -22,9 +23,13 @@ Future<void> main() async {
 
   final ads = AdService(settings);
   final iap = IapService(settings);
+  final audio = AudioService(settings);
+  AudioService.install(audio);
   // Non-blocking: the game must open instantly, with or without a network.
   unawaited(ads.init());
   unawaited(iap.init());
+  // Audio init touches platform channels; never block first paint on it.
+  unawaited(audio.init());
 
   runApp(FutoshikiApp(
       settings: settings, progress: progress, ads: ads, iap: iap));

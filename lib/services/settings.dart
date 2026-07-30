@@ -11,6 +11,8 @@ class Settings extends ChangeNotifier {
   static const _kContrast = 'high_contrast';
   static const _kDark = 'dark_mode';
   static const _kHaptics = 'haptics';
+  static const _kSound = 'sound';
+  static const _kMusic = 'music';
   static const _kAdFree = 'ad_free';
   static const _kMistakes = 'show_mistakes';
   static const _kHighlight = 'highlight_peers';
@@ -22,6 +24,11 @@ class Settings extends ChangeNotifier {
   bool _highContrast = false;
   bool _darkMode = false;
   bool _haptics = true;
+  /// Quiet, mono confirmation sounds. ON by default.
+  bool _sound = true;
+  /// Background music is OPT-IN. Audio that starts unasked is an
+  /// uninstall trigger for this audience.
+  bool _music = false;
   bool _adFree = false;
   /// Flag wrong entries immediately. ON by default: finding an error 20 moves
   /// later means unpicking the whole grid.
@@ -34,6 +41,8 @@ class Settings extends ChangeNotifier {
   bool get highContrast => _highContrast;
   bool get darkMode => _darkMode;
   bool get haptics => _haptics;
+  bool get sound => _sound;
+  bool get music => _music;
   bool get adFree => _adFree;
   bool get showMistakes => _showMistakes;
   bool get highlightPeers => _highlightPeers;
@@ -45,6 +54,8 @@ class Settings extends ChangeNotifier {
     _highContrast = _p?.getBool(_kContrast) ?? false;
     _darkMode = _p?.getBool(_kDark) ?? false;
     _haptics = _p?.getBool(_kHaptics) ?? true;
+    _sound = _p?.getBool(_kSound) ?? true;
+    _music = _p?.getBool(_kMusic) ?? false;
     _adFree = _p?.getBool(_kAdFree) ?? false;
     _showMistakes = _p?.getBool(_kMistakes) ?? true;
     _highlightPeers = _p?.getBool(_kHighlight) ?? true;
@@ -66,6 +77,8 @@ class Settings extends ChangeNotifier {
   Future<void> setHighContrast(bool v) async { _highContrast = v; await _set(_kContrast, v); }
   Future<void> setDarkMode(bool v) async { _darkMode = v; await _set(_kDark, v); }
   Future<void> setHaptics(bool v) async { _haptics = v; await _set(_kHaptics, v); }
+  Future<void> setSound(bool v) async { _sound = v; await _set(_kSound, v); }
+  Future<void> setMusic(bool v) async { _music = v; await _set(_kMusic, v); }
   Future<void> setAdFree(bool v) async { _adFree = v; await _set(_kAdFree, v); }
   Future<void> setShowMistakes(bool v) async { _showMistakes = v; await _set(_kMistakes, v); }
   Future<void> setHighlightPeers(bool v) async { _highlightPeers = v; await _set(_kHighlight, v); }
