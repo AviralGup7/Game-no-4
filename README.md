@@ -16,6 +16,19 @@ See [RELEASE.md](RELEASE.md).
 
 ---
 
+## Audio
+
+Eight sound effects and three background-music tracks, all **CC0** (Kenney
+*Interface Sounds*, MintoDog *Cozy Puzzle*). Full provenance in
+[`ATTRIBUTION.md`](ATTRIBUTION.md); `tool/verify_assets.sh` checks in CI that
+every path referenced in Dart exists, decodes, is long enough to be audible,
+is declared in `pubspec.yaml`, and is attributed.
+
+Background music **defaults to OFF** — audio that starts unasked is an
+uninstall trigger for this audience. Sound effects default on, mono and quiet.
+A wrong entry plays a soft click, never a buzzer. If the audio plugin is
+unavailable the app runs silently rather than crashing.
+
 ## Why Futoshiki
 
 Game #4 in a portfolio strategy, scoring 75.5 on the opportunity model. The
